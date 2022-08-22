@@ -51,8 +51,15 @@ public class PassOne {
             }
             if (parts[1].equals("ORIGIN")) {
                 lc = expr(parts[2]);
-                String[] splits = parts[2].split("\\+");
-                code = "(AD, 04)\t(S, " + SYMTAB.get(splits[0]).getindex() + ")+" + Integer.parseInt(splits[1]);
+                code = "";
+                if (parts[2].contains("+")) {
+                    String[] splits = parts[2].split("\\+");
+                    code = "(AD, 04)\t(S, " + SYMTAB.get(splits[0]).getindex() + ")+" + Integer.parseInt(splits[1]);
+                } else if (parts[2].contains("-")) {
+                    String[] splits = parts[2].split("\\-");
+                    code = "(AD, 04)\t(S, " + SYMTAB.get(splits[0]).getindex() + ")-" + Integer.parseInt(splits[1]);
+                }
+
                 bw.write(code + "\n");
             }
             if (parts[1].equals("EQU")) {
