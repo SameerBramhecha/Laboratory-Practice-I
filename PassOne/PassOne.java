@@ -29,10 +29,11 @@ public class PassOne {
     }
 
     public void parseFile() throws Exception {
-        br = new BufferedReader(new FileReader("input.txt"));
+        br = new BufferedReader(new FileReader("TestCase2.txt"));
         BufferedWriter bw = new BufferedWriter(new FileWriter("IC.txt"));
         InstTable lookup = new InstTable();
-        String prev = "";
+        String prev;
+        prev = "";
         String line, code;
         while ((line = br.readLine()) != null) {
             String[] parts = line.split("\\s+");
@@ -54,10 +55,10 @@ public class PassOne {
                 code = "";
                 if (parts[2].contains("+")) {
                     String[] splits = parts[2].split("\\+");
-                    code = "(AD, 04)\t(S, " + SYMTAB.get(splits[0]).getindex() + ")+" + Integer.parseInt(splits[1]);
+                    code = "(AD, 03)\t(S,0" + SYMTAB.get(splits[0]).getindex() + ")+" + Integer.parseInt(splits[1]);
                 } else if (parts[2].contains("-")) {
                     String[] splits = parts[2].split("\\-");
-                    code = "(AD, 04)\t(S, " + SYMTAB.get(splits[0]).getindex() + ")-" + Integer.parseInt(splits[1]);
+                    code = "(AD, 03)\t(S,0" + SYMTAB.get(splits[0]).getindex() + ")-" + Integer.parseInt(splits[1]);
                 }
 
                 bw.write(code + "\n");
@@ -66,7 +67,8 @@ public class PassOne {
                 int loc = expr(parts[2]);
                 if (SYMTAB.containsKey(parts[0])) {
                     SYMTAB.put(parts[0], new TableRow(parts[0], loc, SYMTAB.get(parts[0]).getindex()));
-                } else {
+                }
+                else {
                     SYMTAB.put(parts[0], new TableRow(parts[0], loc, ++sym_index));
                 }
                 bw.write("\n");
@@ -76,7 +78,8 @@ public class PassOne {
                 int cnst = Integer.parseInt(parts[2].replace("'", ""));
                 code = "(DL,01)\t(C," + cnst + ")";
                 bw.write(code + "\n");
-            } else if (parts[1].equals("DS")) {
+            }
+            else if (parts[1].equals("DS")) {
                 int size = Integer.parseInt(parts[2].replace("'", ""));
                 code = "(DL,02)\t(C," + size + ")";
                 bw.write(code + "\n");
@@ -91,21 +94,24 @@ public class PassOne {
                     parts[j] = parts[j].replace(",", "");
                     if (lookup.gettype(parts[j]).equals("RG")) {
                         code2 += lookup.getcode(parts[j]) + "\t";
-                    } else if (lookup.gettype(parts[j]).equals("CC")) {
+                    }
+                    else if (lookup.gettype(parts[j]).equals("CC")) {
                         code2 += lookup.getcode(parts[j]) + "\t";
-                    } else {
+                    } 
+                    else {
                         if (parts[j].contains("=")) {
-                            parts[j] = parts[j].replace("=", "").replace("'", "");
+                            parts[j] = parts[j].replace("=", "");
+                            parts[j] = parts[j].replace("'", "");
                             LITTAB.add(new TableRow(parts[j], -1, ++lit_index));
                             lit_ptr++;
-                            code2 += "(L, " + (lit_index) + ")";
+                            code2 += "(L," + (lit_index) + ")";
                         } else if (SYMTAB.containsKey(parts[j])) {
                             int ind = SYMTAB.get(parts[j]).getindex();
-                            code2 += "(S, 0" + ind + " )";
+                            code2 += "(S,0" + ind + ")";
                         } else {
                             SYMTAB.put(parts[j], new TableRow(parts[j], -1, ++sym_index));
                             int ind = SYMTAB.get(parts[j]).getindex();
-                            code2 += "(S, 0" + ind + " )";
+                            code2 += "(S,0" + ind + ")";
                         }
 
                     }
@@ -120,23 +126,29 @@ public class PassOne {
                 for (int j = ptr; j < lit_ptr; j++) {
                     lc++;
                     LITTAB.set(j, new TableRow(LITTAB.get(j).getSymbol(), lc));
-                    code = "(DL,01)\t(C, " + LITTAB.get(j).symbol + " )";
+                    code = "(DL,01)\t(C," + LITTAB.get(j).symbol + ")";
                     bw.write(code + "\n");
                 }
                 pool_ptr++;
-                POOLTAB.add(lit_ptr);
+                POOLTAB.add(lit_ptr-1);
             }
             if (parts[1].equals("END")) {
-                int ptr = POOLTAB.get(pool_ptr);
+                int ptr = POOLTAB.get(pool_ptr)+1;
                 for (int j = ptr; j < lit_ptr; j++) {
                     lc++;
                     LITTAB.set(j, new TableRow(LITTAB.get(j).getSymbol(), lc));
-                    code = "(DL,01)\t(C, " + LITTAB.get(j).symbol + " )";
+                    code = "(DL,01)\t(C," + LITTAB.get(j).symbol + ")";
                     bw.write(code + "\n");
                 }
                 pool_ptr++;
                 POOLTAB.add(lit_ptr);
-                code = "(AD, 02)";
+                if(!parts[2].isEmpty() && parts[2]!=null){
+                    int ind = SYMTAB.get(parts[2]).getindex();
+                    code = "(AD,02)\t(S,0"+ind+")";
+                }
+                else{
+                    code = "(AD,02)";
+                }
                 bw.write(code + "\n");
             }
         }
@@ -161,7 +173,7 @@ public class PassOne {
         BufferedWriter bw = new BufferedWriter(new FileWriter("LITTAB.txt"));
         for (int i = 0; i < LITTAB.size(); i++) {
             TableRow row = LITTAB.get(i);
-            bw.write((i + 1) + "\t" + row.getSymbol() + "\t" + row.getaddress() + "\n");
+            bw.write((i + 1) + "\t" + row.getSymbol() + "\t" + (row.getaddress()-1) + "\n");
         }
         bw.close();
 
@@ -169,8 +181,8 @@ public class PassOne {
 
     void printPoolTab() throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter("POOLTAB.txt"));
-        for (int i = 0; i < POOLTAB.size(); i++) {
-            bw.write((i + 1) + "\t" + POOLTAB.get(i) + "\n");
+        for (int i = 1; i < POOLTAB.size(); i++) {
+            bw.write(POOLTAB.get(i) + "\n");
         }
         bw.close();
 
