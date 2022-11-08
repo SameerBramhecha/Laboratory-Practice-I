@@ -12,7 +12,7 @@ public class MNTEntry {
     }
 
     public void setName(String setName) {
-        this.name = name;
+        this.name = setName;
     }
 
     public String getName() {
