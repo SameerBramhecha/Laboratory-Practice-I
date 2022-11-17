@@ -19,8 +19,8 @@ try:
       print("Obstacle Detected")
       while GPIO.input(sensor):
         time.sleep(0.2)
-   else:
-    GPIO.output(led,True)
+    else:
+      GPIO.output(led,True)
     
     
 except KeyboardInterrupt:
