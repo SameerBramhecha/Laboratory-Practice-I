@@ -73,7 +73,7 @@ public class Pass2 {
                     String splits[] = mdt.get(i).split("\\s+");
                     fr.write("+");
                     for (int k = 0; k < splits.length; k++) {
-                        if (splits[k].contains("(P, ")) {
+                        if (splits[k].contains("(P,")) {
                             splits[k] = splits[k].replaceAll("[^0-9]", "");// not containing number
                             String value = aptab.get(Integer.parseInt(splits[k]));
                             fr.write(value + "\t");
