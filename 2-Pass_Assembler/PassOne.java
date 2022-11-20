@@ -33,7 +33,7 @@ public class PassOne {
     }
 
     public void parseFile() throws Exception {
-        FileReader fr = new FileReader("TestCase2.txt");
+        FileReader fr = new FileReader("TestCase3.txt");
         FileWriter fw = new FileWriter("IC.txt");
         BufferedReader br = new BufferedReader(fr);
         BufferedWriter bw = new BufferedWriter(fw);
